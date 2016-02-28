@@ -1,0 +1,16 @@
+﻿Added anim.py
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# Changes to be committed:
+#	deleted:    spect.flam3
+#	deleted:    test.flam3
+#	deleted:    vidres.flam3
+#
+# Untracked files:
+#	.gitignore
+#	anim.py
+#
+

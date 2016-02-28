@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *.o
 *.png
 *.lo
@@ -15,3 +16,6 @@ stamp-h1
 .libs
 libtool
 test.flam3
+*.flam3
+raw.txt
+*.bak
