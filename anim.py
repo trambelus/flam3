@@ -53,7 +53,7 @@ def process_all(q, template, outfile, other_thread):
 
 		p = c # p = previous, c = current spectrum list
 		c = [max(i) for i in a]
-		c = [i*2-1 for i in c]
+		c = [i/4+0.125 for i in c]
 		process_single(c,p, template, root, outfile)
 
 	with open(outfile, 'a') as f:
