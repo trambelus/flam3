@@ -11,39 +11,53 @@ def input_thread(q):
 	while True:
 		try:
 			line_in = input()
-			#print("Processing line '{}'".format(line_in))
+			print("Input line '{}'".format(line_in))
 			freqb = list(map(float,(line_in.split(' '))))
 			q.put(freqb)
-			print(q)
+			#print(q)
 		except EOFError:
 			print("Reached EOF")
 			return
 
-def process(q, template, outfile, other_thread):
+def process_single(c, p, template, root, outfile):
+	print("Processing: {}".format(c))
+
+	for i in range(10):
+		for j in range(len(c)):
+			root[j+1].attrib['linear'] = str((p[j]+c[j])/2+(p[j]-c[j])/2*cos(pi*i/10))
+
+		flame_strio = io.BytesIO()
+		template.write(flame_strio)
+		flame_str = flame_strio.getvalue()
+		with open(outfile, 'a', encoding='UTF-8') as f:
+			f.write('\n'+flame_str.decode('UTF-8'))
+
+def process_all(q, template, outfile, other_thread):
+	with open(outfile, 'w') as f:
+		f.write('<spectrum>')
 	root = template.getroot()
 	c = [0] * len(root)
 	while True:
 
 		if not other_thread.is_alive() and q.empty():
-			return
+			print('!')
+			break
 
-		try:
-			p = c # p = previous, c = current spectrum list
-			c = q.get(False)
-		except queue.Empty:
-			continue
+		a = []
+		for i in range(10):
+			if q.empty():
+				break
+			a.append(q.get())
 
-		print("\tProcessing: {}".format(c))
+		a = [[a[i][j] for i in range(len(a))] for j in range(len(a[0]))] # reshape
 
-		for i in range(5):
-			for j in range(len(c)-1):
-				root[j+1].attrib['coefs'] = '1 0 0 1 0 {}'.format((p[j]+c[j])/2+(p[j]-c[j])/2*cos(pi*i/5))
+		p = c # p = previous, c = current spectrum list
+		c = [max(i) for i in a]
+		c = [i*2-1 for i in c]
+		process_single(c,p, template, root, outfile)
 
-			flame_strio = io.BytesIO()
-			template.write(flame_strio)
-			flame_str = flame_strio.getvalue()
-			with open(outfile, 'a', encoding='UTF-8') as f:
-				f.write('\n'+flame_str.decode('UTF-8'))
+	with open(outfile, 'a') as f:
+		f.write('</spectrum>')
 
 def parse_args():
 	parser = argparse.ArgumentParser()
@@ -57,9 +71,10 @@ def main():
 	args = parse_args()
 	q = queue.Queue()
 	t = Thread(target=input_thread, args=(q,))
-	t.start()
+	# t.start()
+	input_thread(q)
 	template = ET.parse(args.template)
-	process(q, template, args.output, t)
+	process_all(q, template, args.output, t)
 
 if __name__ == '__main__':
 	main()
